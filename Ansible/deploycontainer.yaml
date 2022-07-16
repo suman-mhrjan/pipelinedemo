@@ -1,0 +1,29 @@
+---
+- name: Run docker container
+  hosts: all
+  gather_facts: false
+  become: yes
+  remote_user: vagrant
+
+  tasks:
+    - name: Install pip
+      apt:
+        update_cache: yes
+        name:
+          - python3-pip
+
+    - name: Install pexpect
+      pip:
+        name:
+          - pexpect
+          - docker
+
+    - name: Run Docker container
+      docker_container:
+        name: demo
+        image: "{{ image_name }}:{{ image_tag }}"
+        state: started
+        recreate: yes
+        detach: true
+        ports:
+          - "80:80"

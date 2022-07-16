@@ -1,0 +1,45 @@
+---
+- name: Deploy docker container in ubuntu
+  hosts: all
+  gather_facts: false
+  remote_user: vagrant
+  become: yes
+
+  vars:
+    dependencies:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    docker_packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+
+  tasks:
+    - name: Add docker official key
+      apt_key: 
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+    - name: Install prerequisites
+      apt:
+        name: "{{ dependencies }}"
+        state: latest
+        update_cache: yes
+    - name: Install docker engine
+      apt:
+        name: "{{ docker_packages }}"
+        state: latest
+        update_cache: yes
+    - name: add ansible user to docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+    - name: reboot machine
+      reboot:
+...
